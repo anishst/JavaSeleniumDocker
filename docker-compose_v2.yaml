@@ -17,6 +17,7 @@ services:
       - hub
     environment:
       - HUB_HOST=hub
+  #  1st test set
   saucedemo-module:
     image: dockerselenium
     depends_on:
@@ -26,6 +27,21 @@ services:
       - BROWSER=chrome
       - HUB_HOST=hub
       - MODULE=saucedemo_tests.xml
-#    store results in reports folder
+    # store results in reports folder
     volumes:
-      - ./reports:/usr/share/selenium_docker/test-output
+      # store reports in /reports/saucedemo
+      - ./reports/saucedemo:/usr/share/selenium_docker/test-output
+  #  2nd test set
+  duck-search-module:
+    image: dockerselenium
+    depends_on:
+      - chrome
+      - firefox
+    environment:
+      - BROWSER=firefox
+      - HUB_HOST=hub
+      - MODULE=duck_search_tests.xml
+    #    store results in reports folder
+    volumes:
+      # store reports in /reports/ducksearch
+      - ./reports/ducksearch:/usr/share/selenium_docker/test-output

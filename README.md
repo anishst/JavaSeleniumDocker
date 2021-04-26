@@ -20,8 +20,8 @@ This one setup selenium grid first using yaml. but tests will be run separately
 This one setup selenium grid and runs the tests using same yaml file!
 
 1.from project root: ```docker-compose -f docker-compose_v2.yaml up``` 
-  - if only wants to see logs related to your tests: ```docker-compose -f docker-compose_v2.yaml up \| grep -e 'saucedemo-module'```
-
+  - if only wants to see logs related to your tests: ```docker-compose -f docker-compose_v2.yaml up | grep -e 'saucedemo-module'```
+2. to speed up tests add more browser containers: ```docker-compose -f docker-compose_v2.yaml up --scale chrome=4 --scale firefox=4```
 ## Running with Maven
 1. Generate jar files: ```mvn clean package -DskipTests```
     - this will generate below files under  *JavaSeleniumDocker\target* folder

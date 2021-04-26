@@ -8,6 +8,7 @@ Java Maven Project to test Selenium Framework with Selenium Grid running in Dock
 ## How to run tests with docker compose
 
 1. from project root, launch grid: ```docker-compose up```
+   - to increase chrome instances: ```docker-compose up --scale chrome=4 --scale firefox=4```
 2. In IntelliJ, right click on ```testng.xml``` file and run to saucedemo test
 3. In IntelliJ,right click on ```search_module.xml``` file and run to duck duck go  tests
 

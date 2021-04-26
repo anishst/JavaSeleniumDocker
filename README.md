@@ -5,12 +5,22 @@ Java Maven Project to test Selenium Framework with Selenium Grid running in Dock
 - Uses Selenium and TestNG
 - use [Selenium Page Factory](https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/support/PageFactory.html)
 
-## How to run tests with docker compose
+## How to run tests with Docker Compose
 
+### Using ```docker-compose.yaml```
+
+This one setup selenium grid first using yaml. but tests will be run separately
 1. from project root, launch grid: ```docker-compose up```
    - to increase chrome instances: ```docker-compose up --scale chrome=4 --scale firefox=4```
 2. In IntelliJ, right click on ```testng.xml``` file and run to saucedemo test
 3. In IntelliJ,right click on ```search_module.xml``` file and run to duck duck go  tests
+
+### Using ```docker-compose_v2.yaml```
+
+This one setup selenium grid and runs the tests using same yaml file!
+
+1.from project root: ```docker-compose -f docker-compose_v2.yaml up``` 
+  - if only wants to see logs related to your tests: ```docker-compose -f docker-compose_v2.yaml up \| grep -e 'saucedemo-module'```
 
 ## Running with Maven
 1. Generate jar files: ```mvn clean package -DskipTests```

@@ -20,7 +20,7 @@ public class BaseTest {
 //        default values
 //        String host = "localhost"; // use this if grid is on same machine as test
         String host = "192.168.1.25";  // ip of your selenium grid server if running on diff machine
-        DesiredCapabilities dc = DesiredCapabilities.chrome();
+        DesiredCapabilities dc;
 
 //
         if(System.getProperty("BROWSER") != null &&

@@ -6,8 +6,8 @@ pipeline {
                 docker {
                     // use maven image to build app
                     image 'maven:3-alpine'
-                    // volume mapping to cache maven plugins
-                    args '-v /root/.m2:/root/.m2'
+                    // volume mapping to cache maven plugins to home directory
+                    args '-v $HOME/.m2:/root/.m2'
                 }
             }
             steps {

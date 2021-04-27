@@ -136,10 +136,14 @@ This one setup selenium grid and runs the tests using same yaml file!
       - To change hub ip during run, use DHUB_HOST variable: ```java -cp selenium-docker.jar:selenium-docker-tests.jar:libs/* -DHUB_HOST=
         192.168.1.25 org.testng.TestNG saucedemo_tests.xml```
         
-## Running Tests with Jenkins
+## Building Docker Image with Jenkins
 
-1. create Jenkinsfile
-    - Linux - see jenkinsfile
+1. Create a Jenkins pipeline job using [GitHub project]((https://github.com/anishst/JavaSeleniumDocker)) 
+2. Run the job 
+    - this will build and create a docker image and push to Docker Hub
+    
+### Jenkinsfile example
+    - Linux - see [Jenkinsfile](https://github.com/anishst/JavaSeleniumDocker/blob/master/Jenkinsfile)
     - Windows:
         ```yaml
             pipeline {
@@ -148,20 +152,17 @@ This one setup selenium grid and runs the tests using same yaml file!
                 stages {
                     stage('Build Jar') {
                         steps {
-                        //sh
                         bat "mvn clean package -DskipTests"
                         }
                     }
                     stage('Build Image') {
                         steps {
-                        //sh
                         bat "docker build -t='anishst/selenium-docker' ."
                         }
                     }
                     stage('Push Image') {
                         steps {
                         withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'pass', usernameVariable: 'user')]) {
-                        //sh
                         bat "docker login --username=${user} --password=${pass}"
                         bat "docker push anishst/selenium-docker:latest"
                         }                           

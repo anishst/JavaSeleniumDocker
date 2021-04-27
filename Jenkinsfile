@@ -4,7 +4,6 @@ pipeline {
         stage('Build Jar') {
             agent {
                 docker {
-                use maven
                     // use maven image to build app
                     image 'maven:3-alpine'
                     // volume mapping to cache maven plugins

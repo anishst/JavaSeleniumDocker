@@ -7,7 +7,30 @@ Java Maven Project to test Selenium Framework with Selenium Grid running in Dock
 
 ## How to run tests with Docker Compose
 
-### Using ```docker-compose.yaml```
+### Using ```docker-compose.yaml``` to setup grid only
+
+Use below docker-compose yaml file:
+```yaml
+version: "3"
+services:
+  hub:
+    image: selenium/hub:3.141.59
+    ports:
+      - "4444:4444"
+  chrome:
+    image: selenium/node-chrome:3.141.59
+    shm_size: '1gb'
+    depends_on:
+      - hub
+    environment:
+      - HUB_HOST=hub
+  firefox:
+    image: selenium/node-firefox:3.141.59
+    depends_on:
+      - hub
+    environment:
+      - HUB_HOST=hub
+```
 
 This one setup selenium grid first using yaml. but tests will be run separately
 1. from project root, launch grid: ```docker-compose up```
@@ -15,14 +38,51 @@ This one setup selenium grid first using yaml. but tests will be run separately
 2. In IntelliJ, right click on ```testng.xml``` file and run to saucedemo test
 3. In IntelliJ,right click on ```search_module.xml``` file and run to duck duck go  tests
 
-### Using ```docker-compose_v2.yaml```
+### Using ```docker-compose.yaml``` to setup grid and run tests on demand
 
 This one setup selenium grid and runs the tests using same yaml file!
 
-1.from project root: ```docker-compose -f docker-compose_v2.yaml up``` 
-  - if only wants to see logs related to your tests: ```docker-compose -f docker-compose_v2.yaml up | grep -e 'saucedemo-module'```
-2. to speed up tests add more browser containers: ```docker-compose -f docker-compose_v2.yaml up --scale chrome=4 --scale firefox=4```
-## Running with Maven
+1.from project root: ```docker-compose -f docker-compose.yaml up``` 
+  - if only wants to see logs related to your tests: ```docker-compose -f docker-compose.yaml up | grep -e 'saucedemo-module'```
+
+### Scaling Options
+-  to speed up tests add more browser containers: ```docker-compose -f docker-compose.yaml up --scale chrome=4 --scale firefox=4```
+
+- If you want to run same tests with mutliple browsers you can copy and create additional services:
+    
+    ```yaml
+    ...
+      #  1st test set -with firefox
+      saucedemo-module_firefox:
+        image: dockerselenium
+        depends_on:
+          - chrome
+          - firefox
+        environment:
+          - BROWSER=firefox
+          - HUB_HOST=hub
+          - MODULE=saucedemo_tests.xml
+        # store results in reports folder
+        volumes:
+          # store reports in /reports/saucedemo
+          - ./reports/saucedemo:/usr/share/selenium_docker/test-output
+      #  1st test set - chrome
+      saucedemo-module_chrome:
+        image: dockerselenium
+        depends_on:
+          - chrome
+          - firefox
+        environment:
+          - BROWSER=chrome
+          - HUB_HOST=hub
+          - MODULE=saucedemo_tests.xml
+        # store results in reports folder
+        volumes:
+          # store reports in /reports/saucedemo
+          - ./reports/saucedemo:/usr/share/selenium_docker/test-output
+    ...
+    ```
+## Building with Maven and running tests from target folder
 1. Generate jar files: ```mvn clean package -DskipTests```
     - this will generate below files under  *JavaSeleniumDocker\target* folder
         - ```selenium-docker.jar``` (page object)
@@ -75,10 +135,46 @@ This one setup selenium grid and runs the tests using same yaml file!
           ockerselenium```
       - To change hub ip during run, use DHUB_HOST variable: ```java -cp selenium-docker.jar:selenium-docker-tests.jar:libs/* -DHUB_HOST=
         192.168.1.25 org.testng.TestNG saucedemo_tests.xml```
+        
+## Running Tests with Jenkins
+
+1. create Jenkinsfile
+    - Linux - see jenkinsfile
+    - Windows:
+        ```yaml
+            pipeline {
+                // master executor should be set to 0
+                agent any
+                stages {
+                    stage('Build Jar') {
+                        steps {
+                        //sh
+                        bat "mvn clean package -DskipTests"
+                        }
+                    }
+                    stage('Build Image') {
+                        steps {
+                        //sh
+                        bat "docker build -t='anishst/selenium-docker' ."
+                        }
+                    }
+                    stage('Push Image') {
+                        steps {
+                        withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'pass', usernameVariable: 'user')]) {
+                        //sh
+                        bat "docker login --username=${user} --password=${pass}"
+                        bat "docker push anishst/selenium-docker:latest"
+                        }                           
+                    }
+                }
+                }
+            }
+         ```
+      
 ## To Do
 - [x] setup to run on grid
 - [ ]  make it run locally if hub is not there
-- [ ] test running via maven command line; currently error
+- [x] test running via maven command line; currently error
     - ```mvn clean test -DsuiteXmlFile=duck_search_tests.xml``` (NOT WORKING Due to parameters)
         - Error: Parameter 'keyword' is required by @Test on method search but has not been marked @Optional or define
     - https://testng.org/doc/documentation-main.html#parameters
